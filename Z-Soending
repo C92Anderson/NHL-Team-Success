@@ -1,0 +1,124 @@
+libname data "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\data";
+libname use "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\use";
+
+proc transpose data=use.tempspendinga98_11 out=zspend;
+	id team;
+	var Salary_98 Salary_99 Salary_00 Salary_01 Salary_02 Salary_03 Salary_04 salary_06 salary_07 salary_08 salary_09 salary_10 salary_11;
+	run;
+
+
+data use.ztempspend (drop=_label_ avespend sdspend ANA ATL BOS BUF CAR CAL CHI CBJ COL DAL DET EDM FLA LA MIN MTL NSH NJ NYI NYR OTT PHI PHX PIT SJ STL TB TOR VAN WSH);
+	set zspend;
+	avespend=mean(ANA, ATL, BOS, BUF, CAR, CAL, CHI, CBJ, COL, DAL, DET, EDM, FLA, LA, MIN, MTL, NSH, NJ, NYI, NYR, OTT, PHI, PHX, PIT, SJ, STL, TB, TOR, VAN, WSH);
+	sdspend=std(ANA, ATL, BOS, BUF, CAR, CAL, CHI, CBJ, COL, DAL, DET, EDM, FLA, LA, MIN, MTL, NSH, NJ, NYI, NYR, OTT, PHI, PHX, PIT, SJ, STL, TB, TOR, VAN, WSH);
+zANA=(ANA-avespend)/sdspend;
+zATL=(ATL-avespend)/sdspend;
+zBOS=(BOS-avespend)/sdspend;
+zBUF=(BUF-avespend)/sdspend;
+zCAR=(CAR-avespend)/sdspend;
+zCAL=(CAL-avespend)/sdspend;
+zCHI=(CHI-avespend)/sdspend;
+zCBJ=(CBJ-avespend)/sdspend;
+zCOL=(COL-avespend)/sdspend;
+zDAL=(DAL-avespend)/sdspend;
+zDET=(DET-avespend)/sdspend;
+zEDM=(EDM-avespend)/sdspend;
+zFLA=(FLA-avespend)/sdspend;
+zLA=(LA-avespend)/sdspend;
+zMIN=(MIN-avespend)/sdspend;
+zMTL=(MTL-avespend)/sdspend;
+zNSH=(NSH-avespend)/sdspend;
+zNJ=(NJ-avespend)/sdspend;
+zNYI=(NYI-avespend)/sdspend;
+zNYR=(NYR-avespend)/sdspend;
+zOTT=(OTT-avespend)/sdspend;
+zPHI=(PHI-avespend)/sdspend;
+zPHX=(PHX-avespend)/sdspend;
+zPIT=(PIT-avespend)/sdspend;
+zSJ=(SJ-avespend)/sdspend;
+zSTL=(STL-avespend)/sdspend;
+zTB=(TB-avespend)/sdspend;
+zTOR=(TOR-avespend)/sdspend;
+zVAN=(VAN-avespend)/sdspend;
+zWSH=(WSH-avespend)/sdspend;
+run;
+
+
+proc transpose data=use.ztempspend out=use.ztempspend;
+	id _name_;
+	var zANA zATL zBOS zBUF zCAR zCAL zCHI zCBJ zCOL zDAL zDET zEDM zFLA zLA zMIN zMTL zNSH zNJ zNYI zNYR zOTT zPHI zPHX zPIT zSJ zSTL zTB zTOR zVAN zWSH;
+run;
+
+data use.ztempspend (drop=_name_);
+	set use.ztempspend;
+	team=substr(_name_,2,length(_name_)-1);
+	run;
+
+%macro yr(yr);
+data &yr. (keep=team zspend);
+	set use.ztempspend;
+	zspend=&yr.;
+	run;
+
+%macro tm(tm);
+	data &yr.;
+		set &yr.;
+		if team="&tm." then team1="&tm._&yr.";
+		run;
+%mend tm;
+%tm(ANA);
+%tm(ATL);
+%tm(BOS);
+%tm(BUF);
+%tm(CAR);
+%tm(CAL);
+%tm(CHI);
+%tm(CBJ);
+%tm(COL);
+%tm(DAL);
+%tm(DET);
+%tm(EDM);
+%tm(FLA);
+%tm(LA);
+%tm(MIN);
+%tm(MTL);
+%tm(NSH);
+%tm(NJ);
+%tm(NYI);
+%tm(NYR);
+%tm(OTT);
+%tm(PHI);
+%tm(PHX);
+%tm(PIT);
+%tm(SJ);
+%tm(STL);
+%tm(TB);
+%tm(TOR);
+%tm(VAN);
+%tm(WSH);
+
+%mend yr;
+%yr(Salary_98);
+%yr(Salary_99);
+%yr(Salary_00);
+%yr(Salary_01);
+%yr(Salary_02);
+%yr(Salary_03);
+%yr(Salary_04);
+%yr(Salary_06);
+%yr(Salary_07);
+%yr(Salary_08);
+%yr(Salary_09);
+%yr(Salary_10);
+%yr(Salary_11);
+
+data use.zspendlist ;
+	set Salary_98 Salary_99 Salary_00 Salary_01 Salary_02 Salary_03 Salary_04 salary_06 salary_07 salary_08 salary_09 salary_10 salary_11;
+	year=substr(team1,anydigit(team1),2);
+	if 5< year<13 then dummy=1;
+	else dummy=0;
+	dummyspend=dummy*zspend;
+	run;
+
+
+ 
