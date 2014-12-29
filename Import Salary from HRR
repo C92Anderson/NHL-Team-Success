@@ -1,0 +1,50 @@
+libname data "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\data";
+libname use "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\use";
+
+%macro st(st,nm);
+proc import datafile="F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\data\HRR (FY06-FY11), Games (FY00-FY12), TV HH (FY12).xlsx"
+	out=spending_&nm. dbms=excel replace;
+	getnames=yes;
+	range='&st.$A5:AK294';
+	run;
+data spending_&nm. (drop = f1 f2 f3 f4 f5 f6 NHL);
+	set spending_&nm. (firstobs=289);
+	run;
+proc transpose data=spending_&nm. out= spend_&nm.;
+	var ANA ATL BOS BUF CAR CAL CHI CBJ COL DAL DET EDM FLA LA MIN MTL NSH NJ NYI NYR OTT PHI PHX PIT SJ STL TB TOR VAN WSH;
+	run;
+data spend_&nm. (rename = (col1=Salary_&nm. _name_=team));
+	set spend_&nm. (drop = _label_);
+	run;
+proc sort data=spend_&nm.;
+	by team;
+	run;
+%mend st;
+%st(FY06 RS,rs06);
+%st(FY06 PO,po06);
+%st(FY07 RS,rs07);
+%st(FY07 PO,po07);
+%st(FY08 RS,rs08);
+%st(FY08 PO,po08);
+%st(FY09 RS,rs09);
+%st(FY09 PO,po09);
+%st(FY10 RS,rs10);
+%st(FY10 PO,po10);
+%st(FY11 RS,rs11);
+%st(FY11 PO,po11);
+
+data spending06_11;
+	merge spend_rs06 spend_po06 spend_rs07 spend_po07 spend_rs08 spend_po08 spend_rs09 spend_po09 spend_rs10 spend_po10 spend_rs11 spend_po11;
+	by team;
+	run;
+
+data use.spending06_11 (keep = team salary_06 salary_07 salary_08 salary_09 salary_10 salary_11);
+	set spending06_11;
+	salary_06 = (Salary_rs06 + Salary_po06)/1000000;
+	salary_07 = (Salary_rs07 + Salary_po07)/1000000;
+	salary_08 = (Salary_rs08 + Salary_po08)/1000000;
+	salary_09 = (Salary_rs09 + Salary_po09)/1000000;
+	salary_10 = (Salary_rs10 + Salary_po10)/1000000;
+	salary_11 = (Salary_rs11 + Salary_po11)/1000000;
+	run;
+
