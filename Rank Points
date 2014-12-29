@@ -1,0 +1,71 @@
+libname use "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\use";
+
+data rkpoint;
+	set use.standings (keep= team rank_98 rank_99 rank_00 rank_01 rank_02 rank_03 rank_04 rank_06 rank_07 rank_08 rank_09 rank_10 rank_11);
+	run;
+
+%macro yr(yr);
+data &yr.;
+	set rkpoint;
+	rkyr=&yr.;
+	run;
+
+%macro tm(tm);
+	data &yr.;
+		set &yr.;
+		if team="&tm." then team1="&tm._&yr.";
+		run;
+%mend tm;
+%tm(ANA);
+%tm(ATL);
+%tm(BOS);
+%tm(BUF);
+%tm(CAR);
+%tm(CAL);
+%tm(CHI);
+%tm(CBJ);
+%tm(COL);
+%tm(DAL);
+%tm(DET);
+%tm(EDM);
+%tm(FLA);
+%tm(LA);
+%tm(MIN);
+%tm(MTL);
+%tm(NSH);
+%tm(NJ);
+%tm(NYI);
+%tm(NYR);
+%tm(OTT);
+%tm(PHI);
+%tm(PHX);
+%tm(PIT);
+%tm(SJ);
+%tm(STL);
+%tm(TB);
+%tm(TOR);
+%tm(VAN);
+%tm(WSH);
+
+%mend yr;
+%yr(rank_98);
+%yr(rank_99);
+%yr(rank_00);
+%yr(rank_01);
+%yr(rank_02);
+%yr(rank_03);
+%yr(rank_04);
+%yr(rank_06);
+%yr(rank_07);
+%yr(rank_08);
+%yr(rank_09);
+%yr(rank_10);
+%yr(rank_11);
+
+data use.ptsranklist (keep=team rkyr year dummy);
+	set rank_98 rank_99 rank_00 rank_01 rank_02 rank_03 rank_04 rank_06 rank_07 rank_08 rank_09 rank_10 rank_11;
+	year=substr(team1,anydigit(team1),2);
+	if 5< year<13 then dummy=1;
+	else dummy=0;
+	run;
+
