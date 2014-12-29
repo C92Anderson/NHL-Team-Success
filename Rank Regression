@@ -1,0 +1,23 @@
+libname use "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\use";
+
+data use.rkspendlist;
+	set use.rkspendlist;
+	rename team1=team;
+	run;
+
+proc sort data= use.ptsranklist;
+	by year team;
+	run;
+proc sort data=use.rkspendlist;
+	by year team;
+	run;
+
+data zreg2;
+	merge use.ptsranklist use.rkspendlist;
+	by year team;
+	run;
+
+
+proc reg data=zreg2 outest=use.rkptsspendout tableout adjrsq;
+               model rkyr=dummy rk dummyspend;
+               run;
