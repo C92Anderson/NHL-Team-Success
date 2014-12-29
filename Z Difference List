@@ -1,0 +1,124 @@
+libname data "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\data";
+libname use "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\use";
+
+data zdiff;
+	set use.standings (keep= team diff_98 diff_99 diff_00 diff_01 diff_02 diff_03 
+								diff_04 diff_06 diff_07 diff_08 diff_09 diff_10 diff_11);
+	run;
+
+
+proc transpose data=zdiff out=zdiff;
+	id team;
+	var diff_98 diff_99 diff_00 diff_01 diff_02 diff_03 diff_04 diff_06 diff_07 diff_08 diff_09 diff_10 diff_11;
+	run;
+
+data use.zdiff (drop=_label_ avediff sddiff ANA ATL BOS BUF CAR CAL CHI CBJ COL DAL DET EDM FLA LA MIN MTL NSH NJ NYI NYR OTT PHI PHX PIT SJ STL TB TOR VAN WSH);
+	set zdiff;
+	avediff=mean(ANA, ATL, BOS, BUF, CAR, CAL, CHI, CBJ, COL, DAL, DET, EDM, FLA, LA, MIN, MTL, NSH, NJ, NYI, NYR, OTT, PHI, PHX, PIT, SJ, STL, TB, TOR, VAN, WSH);
+	sddiff=std(ANA, ATL, BOS, BUF, CAR, CAL, CHI, CBJ, COL, DAL, DET, EDM, FLA, LA, MIN, MTL, NSH, NJ, NYI, NYR, OTT, PHI, PHX, PIT, SJ, STL, TB, TOR, VAN, WSH);
+zANA=(ANA-avediff)/sddiff;
+zATL=(ATL-avediff)/sddiff;
+zBOS=(BOS-avediff)/sddiff;
+zBUF=(BUF-avediff)/sddiff;
+zCAR=(CAR-avediff)/sddiff;
+zCAL=(CAL-avediff)/sddiff;
+zCHI=(CHI-avediff)/sddiff;
+zCBJ=(CBJ-avediff)/sddiff;
+zCOL=(COL-avediff)/sddiff;
+zDAL=(DAL-avediff)/sddiff;
+zDET=(DET-avediff)/sddiff;
+zEDM=(EDM-avediff)/sddiff;
+zFLA=(FLA-avediff)/sddiff;
+zLA=(LA-avediff)/sddiff;
+zMIN=(MIN-avediff)/sddiff;
+zMTL=(MTL-avediff)/sddiff;
+zNSH=(NSH-avediff)/sddiff;
+zNJ=(NJ-avediff)/sddiff;
+zNYI=(NYI-avediff)/sddiff;
+zNYR=(NYR-avediff)/sddiff;
+zOTT=(OTT-avediff)/sddiff;
+zPHI=(PHI-avediff)/sddiff;
+zPHX=(PHX-avediff)/sddiff;
+zPIT=(PIT-avediff)/sddiff;
+zSJ=(SJ-avediff)/sddiff;
+zSTL=(STL-avediff)/sddiff;
+zTB=(TB-avediff)/sddiff;
+zTOR=(TOR-avediff)/sddiff;
+zVAN=(VAN-avediff)/sddiff;
+zWSH=(WSH-avediff)/sddiff;
+run;
+
+proc transpose data=use.zdiff out=use.zdiff;
+	id _name_;
+	var zANA zATL zBOS zBUF zCAR zCAL zCHI zCBJ zCOL zDAL zDET zEDM zFLA zLA zMIN zMTL zNSH zNJ zNYI zNYR zOTT zPHI zPHX zPIT zSJ zSTL zTB zTOR zVAN zWSH;
+run;
+
+data use.zdiff (drop=_name_);
+	set use.zdiff;
+	team=substr(_name_,2,length(_name_)-1);
+	run;
+
+%macro yr(yr);
+data &yr. (keep=team zdiff);
+	set use.zdiff;
+	zdiff=&yr.;
+	run;
+
+%macro tm(tm);
+	data &yr.;
+		set &yr.;
+		if team="&tm." then team1="&tm._&yr.";
+		run;
+%mend tm;
+%tm(ANA);
+%tm(ATL);
+%tm(BOS);
+%tm(BUF);
+%tm(CAR);
+%tm(CAL);
+%tm(CHI);
+%tm(CBJ);
+%tm(COL);
+%tm(DAL);
+%tm(DET);
+%tm(EDM);
+%tm(FLA);
+%tm(LA);
+%tm(MIN);
+%tm(MTL);
+%tm(NSH);
+%tm(NJ);
+%tm(NYI);
+%tm(NYR);
+%tm(OTT);
+%tm(PHI);
+%tm(PHX);
+%tm(PIT);
+%tm(SJ);
+%tm(STL);
+%tm(TB);
+%tm(TOR);
+%tm(VAN);
+%tm(WSH);
+
+%mend yr;
+%yr(diff_98);
+%yr(diff_99);
+%yr(diff_00);
+%yr(diff_01);
+%yr(diff_02);
+%yr(diff_03);
+%yr(diff_04);
+%yr(diff_06);
+%yr(diff_07);
+%yr(diff_08);
+%yr(diff_09);
+%yr(diff_10);
+%yr(diff_11);
+
+data use.zdifflist;
+	set diff_98 diff_99 diff_00 diff_01 diff_02 diff_03 diff_04 diff_06 diff_07 diff_08 diff_09 diff_10 diff_11;
+	year=substr(team1,anydigit(team1),2);
+	if 5< year<13 then dummy=1;
+	else dummy=0;
+	run;
