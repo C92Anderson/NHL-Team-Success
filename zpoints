@@ -1,0 +1,126 @@
+libname data "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\data";
+libname use "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\use";
+
+data zpoints;
+	set use.standings (keep= team points_98 Points_99 Points_00 Points_01 Points_02 Points_03 
+								Points_04 Points_06 Points_07 Points_08 Points_09 Points_10 Points_11);
+	run;
+
+
+proc transpose data=zpoints out=zpoints;
+	id team;
+	var Points_98 Points_99 Points_00 Points_01 Points_02 Points_03 Points_04 Points_06 Points_07 Points_08 Points_09 Points_10 Points_11;
+	run;
+
+data use.zpoints (drop=_label_ avepoints sdpoints ANA ATL BOS BUF CAR CAL CHI CBJ COL DAL DET EDM FLA LA MIN MTL NSH NJ NYI NYR OTT PHI PHX PIT SJ STL TB TOR VAN WSH);
+	set zpoints;
+	avepoints=mean(ANA, ATL, BOS, BUF, CAR, CAL, CHI, CBJ, COL, DAL, DET, EDM, FLA, LA, MIN, MTL, NSH, NJ, NYI, NYR, OTT, PHI, PHX, PIT, SJ, STL, TB, TOR, VAN, WSH);
+	sdpoints=std(ANA, ATL, BOS, BUF, CAR, CAL, CHI, CBJ, COL, DAL, DET, EDM, FLA, LA, MIN, MTL, NSH, NJ, NYI, NYR, OTT, PHI, PHX, PIT, SJ, STL, TB, TOR, VAN, WSH);
+zANA=(ANA-avepoints)/sdpoints;
+zATL=(ATL-avepoints)/sdpoints;
+zBOS=(BOS-avepoints)/sdpoints;
+zBUF=(BUF-avepoints)/sdpoints;
+zCAR=(CAR-avepoints)/sdpoints;
+zCAL=(CAL-avepoints)/sdpoints;
+zCHI=(CHI-avepoints)/sdpoints;
+zCBJ=(CBJ-avepoints)/sdpoints;
+zCOL=(COL-avepoints)/sdpoints;
+zDAL=(DAL-avepoints)/sdpoints;
+zDET=(DET-avepoints)/sdpoints;
+zEDM=(EDM-avepoints)/sdpoints;
+zFLA=(FLA-avepoints)/sdpoints;
+zLA=(LA-avepoints)/sdpoints;
+zMIN=(MIN-avepoints)/sdpoints;
+zMTL=(MTL-avepoints)/sdpoints;
+zNSH=(NSH-avepoints)/sdpoints;
+zNJ=(NJ-avepoints)/sdpoints;
+zNYI=(NYI-avepoints)/sdpoints;
+zNYR=(NYR-avepoints)/sdpoints;
+zOTT=(OTT-avepoints)/sdpoints;
+zPHI=(PHI-avepoints)/sdpoints;
+zPHX=(PHX-avepoints)/sdpoints;
+zPIT=(PIT-avepoints)/sdpoints;
+zSJ=(SJ-avepoints)/sdpoints;
+zSTL=(STL-avepoints)/sdpoints;
+zTB=(TB-avepoints)/sdpoints;
+zTOR=(TOR-avepoints)/sdpoints;
+zVAN=(VAN-avepoints)/sdpoints;
+zWSH=(WSH-avepoints)/sdpoints;
+run;
+
+proc transpose data=use.zpoints out=use.zpoints;
+	id _name_;
+	var zANA zATL zBOS zBUF zCAR zCAL zCHI zCBJ zCOL zDAL zDET zEDM zFLA zLA zMIN zMTL zNSH zNJ zNYI zNYR zOTT zPHI zPHX zPIT zSJ zSTL zTB zTOR zVAN zWSH;
+run;
+
+data use.zpoints (drop=_name_);
+	set use.zpoints;
+	team=substr(_name_,2,length(_name_)-1);
+	run;
+
+%macro yr(yr);
+data &yr. (keep=team zpoints);
+	set use.zpoints;
+	zpoints=&yr.;
+	run;
+
+%macro tm(tm);
+	data &yr.;
+		set &yr.;
+		if team="&tm." then team1="&tm._&yr.";
+		run;
+%mend tm;
+%tm(ANA);
+%tm(ATL);
+%tm(BOS);
+%tm(BUF);
+%tm(CAR);
+%tm(CAL);
+%tm(CHI);
+%tm(CBJ);
+%tm(COL);
+%tm(DAL);
+%tm(DET);
+%tm(EDM);
+%tm(FLA);
+%tm(LA);
+%tm(MIN);
+%tm(MTL);
+%tm(NSH);
+%tm(NJ);
+%tm(NYI);
+%tm(NYR);
+%tm(OTT);
+%tm(PHI);
+%tm(PHX);
+%tm(PIT);
+%tm(SJ);
+%tm(STL);
+%tm(TB);
+%tm(TOR);
+%tm(VAN);
+%tm(WSH);
+
+%mend yr;
+%yr(Points_98);
+%yr(Points_99);
+%yr(Points_00);
+%yr(Points_01);
+%yr(Points_02);
+%yr(Points_03);
+%yr(Points_04);
+%yr(Points_06);
+%yr(Points_07);
+%yr(Points_08);
+%yr(Points_09);
+%yr(Points_10);
+%yr(Points_11);
+
+data use.zpointslist;
+	set Points_98 points_99 points_00 points_01 points_02 points_03 points_04 points_06 points_07 points_08 points_09 points_10 points_11;
+	year=substr(team1,anydigit(team1),2);
+	if 5< year<13 then dummy=1;
+	else dummy=0;
+	run;
+
+
