@@ -1,0 +1,22 @@
+libname data "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\data";
+libname use "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\use";
+
+proc import datafile="F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\data\Team Payroll by Season.xlsx"
+	out=use.tempspend98_04 dbms=excel replace;
+	sheet="AllSalary";
+	range='AllSalary$A1:H31';
+	run;
+
+data use.tempspend98_04 (rename=(franchise=team _997_98=Salary_98 _998_99=Salary_99 _999_2000=Salary_00 _000_01=Salary_01 _001_02=Salary_02 _002_03=Salary_03 _003_04=Salary_04));
+	set use.tempspend98_04;
+	run;
+proc sort data=use.tempspend98_04;	
+	by team; run;
+proc sort data=use.spending06_11;
+	by team; run;
+data use.tempspendinga98_11;
+	merge use.tempspend98_04 use.spending06_11;
+	by team;
+	run;
+
+
