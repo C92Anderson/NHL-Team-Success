@@ -1,0 +1,68 @@
+libname use "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\use";
+
+%macro yr(yr);
+data &yr. ;
+	set use.tempspendinga98_11;
+	spend=&yr.;
+	run;
+
+%macro tm(tm);
+	data &yr.;
+		set &yr.;
+		if team="&tm." then team1="&tm._&yr.";
+		run;
+%mend tm;
+%tm(ANA);
+%tm(ATL);
+%tm(BOS);
+%tm(BUF);
+%tm(CAR);
+%tm(CAL);
+%tm(CHI);
+%tm(CBJ);
+%tm(COL);
+%tm(DAL);
+%tm(DET);
+%tm(EDM);
+%tm(FLA);
+%tm(LA);
+%tm(MIN);
+%tm(MTL);
+%tm(NSH);
+%tm(NJ);
+%tm(NYI);
+%tm(NYR);
+%tm(OTT);
+%tm(PHI);
+%tm(PHX);
+%tm(PIT);
+%tm(SJ);
+%tm(STL);
+%tm(TB);
+%tm(TOR);
+%tm(VAN);
+%tm(WSH);
+
+
+%mend yr;
+%yr(Salary_98);
+%yr(Salary_99);
+%yr(Salary_00);
+%yr(Salary_01);
+%yr(Salary_02);
+%yr(Salary_03);
+%yr(Salary_04);
+%yr(Salary_06);
+%yr(Salary_07);
+%yr(Salary_08);
+%yr(Salary_09);
+%yr(Salary_10);
+%yr(Salary_11);
+
+data use.spendlist (keep= spend team1 year dummyspend dummy);
+	set Salary_98 Salary_99 Salary_00 Salary_01 Salary_02 Salary_03 Salary_04 salary_06 salary_07 salary_08 salary_09 salary_10 salary_11;
+	year=substr(team1,anydigit(team1),2);
+	if 5< year<13 then dummy=1;
+	else dummy=0;
+	dummyspend=dummy*spend;
+	run;
