@@ -1,0 +1,76 @@
+libname use "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\use";
+
+proc sort data=use.lagged;
+	by teamseas; run;
+proc sort data=use.salaryrank;
+	by teamseas; run;
+data use.lagsal;
+	merge use.lagged use.salaryrank;
+	by teamseas;
+	run;
+
+proc sort data=use.attendance;
+	by season game_location;
+	run;
+
+proc means data=use.attendance;
+	by season game_location;
+	var paid_adm;
+	output out=atdmeans mean(paid_adm)=aveatd max(paid_adm)=cap;
+	run;
+
+data use.atdmeans (keep=teamseas capacity);
+	set atdmeans;
+	capacity=aveatd/cap;
+	if _freq_ < 30 then delete;
+	if game_location=" " then delete;
+	if game_location="LAK" then game_location="LA";
+	if game_location="SJS" then game_location="SJ";
+	if game_location="NAS" then game_location="NSH";
+	if game_location="TBL" then game_location="TB";
+	if game_location="WAS" then game_location="WSH";
+	if game_location="NJD" then game_location="NJ";
+	year=1+(scan(season,1,"-")*1);
+	teamseas=catx('_',game_location,year);
+run;
+
+proc sort data=use.atdmeans;
+	by teamseas; run;
+
+data use.atdreg;
+	merge use.atdmeans (in=a) use.lagsal (in=b);
+	by teamseas;
+	if a;
+	run;
+
+%macro cn(cn);
+data use.atdreg;
+	set use.atdreg;
+	if year='.' then delete;
+	if team="&cn." then canada=1;
+	if canada='.' then canada=0;
+	run;
+%mend cn;
+%cn(MTL);
+%cn(TOR);
+%cn(CAL);
+%cn(EDM);
+%cn(OTT);
+%cn(VAN);
+
+
+proc reg data=use.atdreg;
+	model capacity=canada lagpg pr ;
+	run;
+/*
+proc reg data=use.atdreg;
+	model pr=lagpg;
+	run;
+
+proc reg data=use.atdreg;
+	model lagpr=lagpg;
+	run;
+
+proc reg data=use.atdreg;
+	model salary=lagpg;
+	run;*/
