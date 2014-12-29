@@ -1,0 +1,42 @@
+libname data "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\Salary and Standings Data";
+libname use "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\use";
+
+%macro st(st,nm);
+proc import datafile="F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\Salary and Standings Data\Team Payroll by Season.xlsx"
+	out=use.pay_&nm. dbms=excel replace;
+	sheet=&st.;
+	run;
+%mend st;
+%st("AllSalary",total);
+%st("AllRank",rank);
+
+%macro yr(yr,nm);
+proc import datafile="F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\Salary and Standings Data\NHL Standings.xlsx"
+	out=yr_&nm. dbms=excel replace;
+	sheet=&yr.;
+	run;
+
+data yr_&nm. ;
+	set yr_&nm. (keep= f1 abbrev division W P Diff);
+run;
+
+data yr2_&nm.;
+	set yr_&nm. (rename=(abbrev=team)) ;
+	run;
+	
+%mend yr;
+%yr("2011-2012",12);
+%yr("2010-2011",11);
+%yr("2009-2010",10);
+%yr("2008-2009",09);
+%yr("2007-2008",08);
+%yr("2006-2007",07);
+%yr("2005-2006",06);
+%yr("2003-2004",04);
+%yr("2002-2003",03);
+%yr("2001-2002",02);
+%yr("2000-2001",01);
+%yr("1999-2000",00);
+%yr("1998-1999",99);
+%yr("1997-1998",98);
+
