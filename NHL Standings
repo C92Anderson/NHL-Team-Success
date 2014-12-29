@@ -1,0 +1,62 @@
+libname data "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\data";
+libname use "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\use";
+libname data2 "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\Salary and Standings Data";
+
+%macro yr(yr,nm);
+proc import datafile="F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\Salary and Standings Data\NHL Standings.xlsx"
+	out=yr_&nm. dbms=excel replace;
+	range='&yr.$A1:O31';
+	run;
+data yr_&nm. (rename = ( f1=rank_&nm. abbrev=teamold W=Wins_&nm. p=Points_&nm. Diff=Diff_&nm. )) ;
+	set yr_&nm. (keep= f1 abbrev division W P Diff);
+run;
+%mend yr;
+%yr(2011-2012,12);
+%yr(2010-2011,11);
+%yr(2009-2010,10);
+%yr(2008-2009,09);
+%yr(2007-2008,08);
+%yr(2006-2007,07);
+%yr(2005-2006,06);
+%yr(2003-2004,04);
+%yr(2002-2003,03);
+%yr(2001-2002,02);
+%yr(2000-2001,01);
+%yr(1999-2000,00);
+%yr(1998-1999,99);
+%yr(1997-1998,98);
+
+%macro ds(ds);
+proc sort data=&ds.;
+	by teamold; run;
+%mend ds;
+%ds(yr_98);
+%ds(yr_99);
+%ds(yr_00);
+%ds(yr_01);
+%ds(yr_02);
+%ds(yr_03);
+%ds(yr_04);
+%ds(yr_06);
+%ds(yr_07);
+%ds(yr_08);
+%ds(yr_09); 
+%ds(yr_10); 
+%ds(yr_11);
+
+data use.standings;
+	merge yr_98 yr_99 yr_00 yr_01 yr_02 yr_03 yr_04 yr_06 yr_07 yr_08 yr_09 yr_10 yr_11;
+	by teamold;
+	run;
+proc import datafile="F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\data\Team x-walk.xlsx"
+	out=teamxwalk dbms=excel replace;
+	run;
+proc sort data=use.standings;
+	by teamold; run;
+proc sort data=teamxwalk;
+	by teamold; run;
+data use.standings (drop=teamold);
+	merge use.standings teamxwalk;
+	by teamold;
+	run;
+
