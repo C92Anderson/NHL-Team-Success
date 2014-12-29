@@ -1,0 +1,226 @@
+libname data "F:\Competition\PBoberg17658.00-hockey2\Received\2012-04-26 (HRR FY06-FY11, Game Data, TV HH FY12)";
+libname use "F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\CWA\use";
+
+proc import datafile="F:\Competition\PBoberg17658.00-hockey2\Received\2012-04-26 (HRR FY06-FY11, Game Data, TV HH FY12)\HRR (FY06-FY11), Games (FY00-FY12), TV HH (FY12).xlsx"
+	out=use.attendance dbms=excel replace;
+	sheet="Games";
+	run;
+
+proc import datafile="F:\Competition\PBoberg17658.00-hockey2\Analysis\Background Research\Salary and Standings Data\Tables 1 and 5_5-1.xlsx"
+	out=use.lagrank dbms=excel replace;
+	range='Table 1 v2$B5:BG35';
+	run;
+
+data use.lagrank (rename= (__Games_Played=PG_1998
+Performance_Rank=PR_1998
+__Games_Played1=PG_1999
+Performance_Rank1=PR_1999
+__Games_Played2=PG_2000
+Performance_Rank2=PR_2000
+__Games_Played3=PG_2001
+Performance_Rank3=PR_2001
+__Games_Played4=PG_2002
+Performance_Rank4=PR_2002
+__Games_Played5=PG_2003
+Performance_Rank5=PR_2003
+__Games_Played6=PG_2004
+Performance_Rank6=PR_2004
+__Games_Played7=PG_2006
+Performance_Rank7=PR_2006
+__Games_Played8=PG_2007
+Performance_Rank8=PR_2007
+__Games_Played9=PG_2008
+Performance_Rank9=PR_2008
+__Games_Played10=PG_2009
+Performance_Rank10=PR_2009
+__Games_Played11=PG_2010
+Performance_Rank11=PR_2010
+__Games_Played12=PG_2011
+Performance_Rank12=PR_2011
+__Games_Played13=PG_2012
+Performance_Rank13=PR_2012
+abbrev_=team1));
+	set use.lagrank (keep=abbrev_
+__Games_Played
+Performance_Rank
+__Games_Played1
+Performance_Rank1
+__Games_Played2
+Performance_Rank2
+__Games_Played3
+Performance_Rank3
+__Games_Played4
+Performance_Rank4
+__Games_Played5
+Performance_Rank5
+__Games_Played6
+Performance_Rank6
+__Games_Played7
+Performance_Rank7
+__Games_Played8
+Performance_Rank8
+__Games_Played9
+Performance_Rank9
+__Games_Played10
+Performance_Rank10
+__Games_Played11
+Performance_Rank11
+__Games_Played12
+Performance_Rank12
+__Games_Played13
+Performance_Rank13);
+run;
+
+%macro yr(pg,pr);
+data &pg. (keep=team1 pg pr);
+	set use.lagrank;
+	pg = &pg. *1;
+	pr = &pr. *1;
+	run; 
+
+%macro tm(tm);
+	data &pg.;
+		set &pg.;
+		if team1="&tm." then team="&tm._&pg.";
+		run;
+%mend tm;
+%tm(ANA);
+%tm(ATL);
+%tm(BOS);
+%tm(BUF);
+%tm(CAR);
+%tm(CAL);
+%tm(CHI);
+%tm(CBJ);
+%tm(COL);
+%tm(DAL);
+%tm(DET);
+%tm(EDM);
+%tm(FLA);
+%tm(LA);
+%tm(MIN);
+%tm(MTL);
+%tm(NSH);
+%tm(NJ);
+%tm(NYI);
+%tm(NYR);
+%tm(OTT);
+%tm(PHI);
+%tm(PHX);
+%tm(PIT);
+%tm(SJ);
+%tm(STL);
+%tm(TB);
+%tm(TOR);
+%tm(VAN);
+%tm(WSH);
+
+data &pg. (rename=(team1=team));
+	set &pg.;
+	year=scan(team,-1,"_")*1;
+	teamseas=catx('_',team1,year);
+	drop team;
+run;
+
+%mend yr;
+%yr(pg_1998,pr_1998);
+%yr(pg_1999,pr_1999);
+%yr(pg_2000,pr_2000);
+%yr(pg_2001,pr_2001);
+%yr(pg_2002,pr_2002);
+%yr(pg_2003,pr_2003);
+%yr(pg_2004,pr_2004);
+%yr(pg_2006,pr_2006);
+%yr(pg_2007,pr_2007);
+%yr(pg_2008,pr_2008);
+%yr(pg_2009,pr_2009);
+%yr(pg_2010,pr_2010);
+%yr(pg_2011,pr_2011);
+%yr(pg_2012,pr_2012);
+
+data use.performancelag;
+	set pg_1998 pg_1999 pg_2000 pg_2001 pg_2002 pg_2003 pg_2004 pg_2006 pg_2007 pg_2008 pg_2009 pg_2010 pg_2011 pg_2012;
+	run;
+proc sort data=use.performancelag;
+	by year team;
+	run;
+
+%macro tm(tm);
+data &tm.;
+	set use.performancelag;
+	if team="&tm." then output &tm.;
+	run;
+data &tm.;
+	set &tm.;
+	lagpg=lag(pg);
+	lagpr=lag(pr);
+	run;
+%mend tm;
+%tm(ANA);
+%tm(ATL);
+%tm(BOS);
+%tm(BUF);
+%tm(CAR);
+%tm(CAL);
+%tm(CHI);
+%tm(CBJ);
+%tm(COL);
+%tm(DAL);
+%tm(DET);
+%tm(EDM);
+%tm(FLA);
+%tm(LA);
+%tm(MIN);
+%tm(MTL);
+%tm(NSH);
+%tm(NJ);
+%tm(NYI);
+%tm(NYR);
+%tm(OTT);
+%tm(PHI);
+%tm(PHX);
+%tm(PIT);
+%tm(SJ);
+%tm(STL);
+%tm(TB);
+%tm(TOR);
+%tm(VAN);
+%tm(WSH);
+
+data use.lagged (drop=pg);
+	set ANA
+ATL
+BOS
+BUF
+CAL
+CAR
+CBJ
+CHI
+COL
+DAL
+DET
+EDM
+FLA
+LA
+MIN
+MTL
+NJ
+NSH
+NYI
+NYR
+OTT
+PHI
+PHX
+PIT
+SJ
+STL
+TB
+TOR
+VAN
+WSH;
+run;
+
+proc sort data=use.lagged;
+	by year team;
+	run;
+	
